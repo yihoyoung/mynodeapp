@@ -6,14 +6,17 @@
 const Koa = require('koa')
 const app = new Koa()
 
-const body = ctx => {
-  if (ctx.request.path !== '/') {
-    ctx.response.type = 'html'
-    ctx.response.body = `<a href='/'>Go to hello wolrd</a>`
-  } else {
-    ctx.response.body = 'Hello, world!'
-  }
+const route = require('koa-route')
+
+const about = ctx => {
+  ctx.response.type = 'html'
+  ctx.response.body = `<a href='/'>Go to hello wolrd</a>`
+}
+const main = ctx => {
+  ctx.response.body = 'Hello, world!'
 }
 
-app.use(body)
+app.use(route.get('/about', about))
+app.use(route.get('/', main))
+
 app.listen(3000)
