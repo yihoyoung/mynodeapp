@@ -42,8 +42,9 @@ const about = ctx => {
   ctx.response.body = `<a href='/'>Go to hello wolrd</a>`
 }
 const main = ctx => {
-  ctx.throw(500)
-  // ctx.response.body = 'Hello, World!'
+  const n = Number(ctx.cookies.get('view') || 0) + 1
+  ctx.cookies.set('view', n)
+  ctx.response.body = `第${n}次访问次页面， Hello, World!`
 }
 
 const handler = async (ctx, next) => {
@@ -58,7 +59,7 @@ const handler = async (ctx, next) => {
   }
 }
 
-// app.use(handler)
+app.use(handler)
 
 app.use(route.get('/about', about))
 app.use(route.get('/', main))
