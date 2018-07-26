@@ -58,11 +58,13 @@ const handler = async (ctx, next) => {
   }
 }
 
-app.use(handler)
+// app.use(handler)
 
 app.use(route.get('/about', about))
 app.use(route.get('/', main))
 
-
+app.on('error', (err, ctx) =>
+  console.error('server error', err)
+)
 
 app.listen(3000)
