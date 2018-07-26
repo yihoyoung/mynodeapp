@@ -2,3 +2,4 @@ node_modules
 .gitignore
 docker.sh
 Dockerfile
+docker-compose.yaml
