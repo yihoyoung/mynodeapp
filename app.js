@@ -9,6 +9,7 @@ const app = new Koa()
 const route = require('koa-route')
 const path = require('path')
 const serve = require('koa-static')
+const koaBody = require('koa-body')
 
 const _static = serve(path.join(__dirname))
 app.use(_static)
@@ -29,6 +30,7 @@ const logger = async (ctx, next) => {
 }
 
 app.use(logger)
+app.use(koaBody())
 
 const redirect = ctx => {
   ctx.response.redirect('/')
@@ -41,10 +43,16 @@ const about = ctx => {
   ctx.response.type = 'html'
   ctx.response.body = `<a href='/'>Go to hello wolrd</a>`
 }
-const main = ctx => {
+const main = async ctx => {
+  const body = ctx.request.body
+  if (!body.name) ctx.throw(400, 'name required.')
+
   const n = Number(ctx.cookies.get('view') || 0) + 1
   ctx.cookies.set('view', n)
-  ctx.response.body = `第${n}次访问次页面， Hello, World!`
+  ctx.response.body = {
+    name: body.name,
+    message: `第${n}次访问次页面， Hello, World!`
+  }
 }
 
 const handler = async (ctx, next) => {
@@ -55,7 +63,7 @@ const handler = async (ctx, next) => {
     ctx.response.body = {
       message: error.message
     }
-    ctx.app.emit('error', err, ctx)
+    ctx.app.emit('error', error, ctx)
   }
 }
 
@@ -63,6 +71,8 @@ app.use(handler)
 
 app.use(route.get('/about', about))
 app.use(route.get('/', main))
+
+app.use(route.post('/', main))
 
 app.on('error', (err) =>
   console.error('server error', err)
