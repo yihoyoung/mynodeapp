@@ -50,11 +50,11 @@ const handler = async (ctx, next) => {
   try {
     await next()
   } catch (error) {
-    console.log(error.stack)
     ctx.response.status = error.statusCode || err.status || 500
     ctx.response.body = {
       message: error.message
     }
+    ctx.app.emit('error', err, ctx)
   }
 }
 
@@ -63,7 +63,7 @@ const handler = async (ctx, next) => {
 app.use(route.get('/about', about))
 app.use(route.get('/', main))
 
-app.on('error', (err, ctx) =>
+app.on('error', (err) =>
   console.error('server error', err)
 )
 
