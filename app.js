@@ -13,6 +13,13 @@ const serve = require('koa-static')
 const _static = serve(path.join(__dirname))
 app.use(_static)
 
+const redirect = ctx => {
+  ctx.response.redirect('/')
+  ctx.response.body = `<a href="/">Index Page</a>`
+}
+
+app.use(route.get('/redirect', redirect))
+
 const about = ctx => {
   ctx.response.type = 'html'
   ctx.response.body = `<a href='/'>Go to hello wolrd</a>`
