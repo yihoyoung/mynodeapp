@@ -45,7 +45,9 @@ const about = ctx => {
 }
 const main = async ctx => {
   const body = ctx.request.body
-  if (!body.name) ctx.throw(400, 'name required.')
+  if (!body.name) {
+   body.name = 'Guest' 
+  }
 
   const n = Number(ctx.cookies.get('view') || 0) + 1
   ctx.cookies.set('view', n)
@@ -71,7 +73,6 @@ app.use(handler)
 
 app.use(route.get('/about', about))
 app.use(route.get('/', main))
-
 app.use(route.post('/', main))
 
 app.on('error', (err) =>

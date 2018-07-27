@@ -3,3 +3,4 @@ node_modules
 docker.sh
 Dockerfile
 docker-compose.yaml
+run.sh

@@ -1,6 +1,14 @@
 version: "3"
 services:
   web:
-    build: .
+    image: myapp:alpine
+    deploy:
+      replicas: 2
     ports:
     - "3000:3000"
+    networks:
+      - webnet
+    restart_policy:
+        condition: on-failure
+networks:
+  webnet:

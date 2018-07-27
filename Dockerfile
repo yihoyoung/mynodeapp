@@ -7,4 +7,4 @@ RUN npm i
 
 EXPOSE 3000
 
-ENTRYPOINT ["node", "app"]
+CMD ["node", "app"]
