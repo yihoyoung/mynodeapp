@@ -3,12 +3,10 @@ services:
   web:
     image: yihoyoung/myapp:alpine
     deploy:
-      replicas: 2
+      replicas: 1
     ports:
     - "3000:3000"
     networks:
       - webnet
-    restart_policy:
-        condition: on-failure
 networks:
   webnet:
