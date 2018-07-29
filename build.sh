@@ -1,6 +1,6 @@
 
 # build docker image file
-sudo docker build --rm -t myapp:alpine .
+sudo docker build --rm -t yihoyoung/myapp:alpine .
 
 # run docker container
 # sudo docker run -p 3000:3000 myapp:alpine -d

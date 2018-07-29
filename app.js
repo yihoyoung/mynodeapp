@@ -11,6 +11,8 @@ const path = require('path')
 const serve = require('koa-static')
 const koaBody = require('koa-body')
 
+const os = require('os')
+
 const _static = serve(path.join(__dirname))
 app.use(_static)
 
@@ -46,13 +48,14 @@ const about = ctx => {
 const main = async ctx => {
   const body = ctx.request.body
   if (!body.name) {
-   body.name = 'Guest' 
+   body.name = 'Guest'
   }
 
   const n = Number(ctx.cookies.get('view') || 0) + 1
   ctx.cookies.set('view', n)
   ctx.response.body = {
     name: body.name,
+    host: os.hostname(),
     message: `第${n}次访问次页面， Hello, World!`
   }
 }
