@@ -6,80 +6,78 @@
 const Koa = require('koa')
 const app = new Koa()
 
-const route = require('koa-route')
 const path = require('path')
-const serve = require('koa-static')
-const koaBody = require('koa-body')
+const bodyParser = require('koa-bodyparser');
+const session = require('koa-session-minimal');
+const MysqlStore = require('koa-mysql-session');
+const config = require('./config/server.js');
+const mysqlConfig = require('./config/mysql.js');
+const views = require('koa-views')
+const staticCache = require('koa-static-cache')
 
-const os = require('os')
 
-const _static = serve(path.join(__dirname))
-app.use(_static)
+// set home dirname
+global.__home_dir = __dirname
+
+// session存储配置
+const sessionMysqlConfig = {
+  user: mysqlConfig.USERNAME,
+  password: mysqlConfig.PASSWORD,
+  database: mysqlConfig.DATABASE,
+  host: mysqlConfig.HOST,
+}
+
+// 配置session中间件
+app.use(session({
+  key: 'USER_SID',
+  store: new MysqlStore(sessionMysqlConfig)
+}))
+
+// 静态文件
 
 const logger = async (ctx, next) => {
-  let start = Date.now()
-  await next()
-  let end = new Date()
-  let duration = end.getTime() - start
-  let d_s = `${end.getFullYear()}-` +
-    `${end.getMonth() + 1 < 10 ? '0' + (end.getMonth() + 1): end.getMonth() + 1}` +
-    `-${end.getDate()} ` +
-    `${end.getHours() < 10 ? '0' + end.getHours() : end.getHours()}:` +
-    `${end.getMinutes() < 10 ? '0' + end.getMinutes() : end.getMinutes()}:` +
-    `${end.getSeconds() < 10 ? '0' + end.getSeconds() : end.getSeconds()}`
+  const start = Date.now()
+  const end = new Date()
+  const duration = end.getTime() - start
+  const d_s = `${end.getFullYear()}-` +
+  `${end.getMonth() + 1 < 10 ? '0' + (end.getMonth() + 1): end.getMonth() + 1}` +
+  `-${end.getDate()} ` +
+  `${end.getHours() < 10 ? '0' + end.getHours() : end.getHours()}:` +
+  `${end.getMinutes() < 10 ? '0' + end.getMinutes() : end.getMinutes()}:` +
+  `${end.getSeconds() < 10 ? '0' + end.getSeconds() : end.getSeconds()}`
   console.log(`[${d_s}]: ${ctx.request.method} ${ctx.request.url}` +
-    ` - ${ctx.response.status} - ${duration}ms`)
+  ` - ${ctx.response.status} - ${duration}ms`)
+  await next()
 }
-
 app.use(logger)
-app.use(koaBody())
 
-const redirect = ctx => {
-  ctx.response.redirect('/')
-  ctx.response.body = `<a href="/">Index Page</a>`
-}
+app.use(staticCache(path.join(__dirname, './public'), { dynamic: true }, {
+  maxAge: 365 * 24 * 60 * 60
+}))
+app.use(staticCache(path.join(__dirname, './images'), { dynamic: true }, {
+  maxAge: 365 * 24 * 60 * 60
+}))
+  
+// 配置服务端模板渲染引擎中间件
+app.use(views(path.join(__dirname, './views'), {
+  extension: 'ejs'
+}))
 
-app.use(route.get('/redirect', redirect))
+// 解析 body
+app.use(bodyParser({
+  formLimit: '1mb'
+}))
 
-const about = ctx => {
-  ctx.response.type = 'html'
-  ctx.response.body = `<a href='/'>Go to hello wolrd</a>`
-}
-const main = async ctx => {
-  const body = ctx.request.body
-  if (!body.name) {
-   body.name = 'Guest'
-  }
+//  路由
+app.use(require('./routers/signin.js').routes())
+app.use(require('./routers/signup.js').routes())
+app.use(require('./routers/posts.js').routes())
+app.use(require('./routers/signout.js').routes())
 
-  const n = Number(ctx.cookies.get('view') || 0) + 1
-  ctx.cookies.set('view', n)
-  ctx.response.body = {
-    name: body.name,
-    host: os.hostname(),
-    message: `第${n}次访问次页面， Hello, World!`
-  }
-}
-
-const handler = async (ctx, next) => {
-  try {
-    await next()
-  } catch (error) {
-    ctx.response.status = error.statusCode || err.status || 500
-    ctx.response.body = {
-      message: error.message
-    }
-    ctx.app.emit('error', error, ctx)
-  }
-}
-
-app.use(handler)
-
-app.use(route.get('/about', about))
-app.use(route.get('/', main))
-app.use(route.post('/', main))
 
 app.on('error', (err) =>
   console.error('server error', err)
 )
 
-app.listen(3000)
+app.listen(config.PORT)
+console.log(`listening in port ${config.PORT}`)

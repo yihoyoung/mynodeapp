@@ -1,4 +1,13 @@
 # Blog APP
+### run database
+```
+./run_mysql.sh
+```
+
+### create datebase
+```
+CREATE SCHEMA `blog` DEFAULT CHARACTER SET utf8 ;
+```
 
 ## build image
 ```
