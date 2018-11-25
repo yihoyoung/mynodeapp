@@ -1,21 +1,22 @@
+# maintainer lihaorong@163.com
 
-# build docker image file
-sudo docker build --rm -t yihoyoung/myapp:alpine .
+set -e
 
-# run docker container
-# sudo docker run -p 3000:3000 myapp:alpine -d
+OUTPUT_PATH='dist'
 
-# stop container
-# sudo docker stop [container-id]
+rm -rf $OUTPUT_PATH
 
-# into the container
-# sudo docker exec -it [container-id] /bin/sh
+# 编译
+webpack
 
-# rm container
-# sudo docker rm $(sudo docker ps -a -q)
+# 复制 web public 文件
 
-# rm <none> image
-# old version
-# sudo docker rmi $(sudo docker images | grep “^” | awk “{print $3}”)
-# new version
-sudo docker rmi $(sudo docker images -f 'dangling=true' -q)
+cp -r public $OUTPUT_PATH/public
+cp -r views $OUTPUT_PATH/views
+cp package.json $OUTPUT_PATH/package.json
+cp Dockerfile $OUTPUT_PATH/Dockerfile
+
+cd $OUTPUT_PATH
+
+docker build -t yihoyoung/myblog:v1.0 .
+docker push yihoyoug/myblog:v1.0

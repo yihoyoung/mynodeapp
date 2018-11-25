@@ -1,7 +1,7 @@
 version: "3"
 services:
   web:
-    image: yihoyoung/myapp:alpine
+    image: yihoyoung/myblog:v1.0
     deploy:
       replicas: 1
     ports:
